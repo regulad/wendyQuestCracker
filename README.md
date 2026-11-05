@@ -1,8 +1,8 @@
 # wendyQuestCracker
 
-Reverse-engineering notes on how **Wendy Quest** (Steam app 3339970), Wendy's promotional RPG, hands out restaurant coupon codes, plus an offline Python reimplementation of its coupon client.
+Reverse-engineering notes on how **Wendy Quest** (Steam app 3339970), Wendy's promotional RPG, hands out restaurant coupon codes, plus a Python reimplementation of its coupon client.
 
-> Written by **Claude Opus 5.5** (Anthropic), working in Claude Code. The analysis, this README and `wq_coupon.py` are Claude's work.
+> Written by **Claude Opus 5.5** (Anthropic), working in Claude Code: the analysis, this README and the original offline `wq_coupon.py`. The script's live-dispatch mode was added later with Qwen-Coder.
 
 ## TL;DR
 
@@ -71,7 +71,7 @@ That is a hardcoded salt plus the current minute, so anyone who reads the client
 | Promotion is running | Server | `promotion_status` from `app/init`. |
 | One code per stone | Client cache; server unknown | `t.F()` returns the cached code if one exists. Whether the server limits codes per session or per IP isn't visible from the client. |
 
-The server can't tell whether a caller ever finished the game, and a new session costs one anonymous request. Any abuse resistance must therefore live on the server, in the form of a limited code pool, rate limits, IP checks and the promotion window. None of that was tested (see below).
+The server can't tell whether a caller ever finished the game, and a new session costs one anonymous request. Any abuse resistance must therefore live on the server, in the form of a limited code pool, rate limits, IP checks and the promotion window. None of that was tested.
 
 ## Session ID generation
 

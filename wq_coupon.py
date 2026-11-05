@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline reimplementation of Wendy Quest's coupon client.
+"""Reimplementation of Wendy Quest's coupon client.
 
 Source: `WendyQuest.t` in package.nw/js/plugins/WendyQuest.js (javascript-obfuscator
 output; the coupon module's members were additionally mangled to single letters).
