@@ -99,12 +99,21 @@ None of these hide the session or coupon logic, because the client has none wort
 
 ## `wq_coupon.py`
 
-An offline reimplementation of the client's coupon module (Python 3.11+, stdlib only):
+A reimplementation of the client's coupon module (Python 3.11+, stdlib only). By
+default it actually dispatches the three GETs the client would send, threading
+the server-minted `session_id` from `app/session` into `app/init` and
+`coupons/retrieve`, and prints whatever each endpoint returns:
 
 ```
-python wq_coupon.py beef                       # or 1-5, "Frosty Stone", spicy, ...
+python wq_coupon.py beef                # or 1-5, "Frosty Stone", spicy, ...
 python wq_coupon.py 3 --at 2026-11-05T15:28Z   # header for a fixed time (naive = UTC)
+python wq_coupon.py 1 --offline           # print the requests the client would send, no I/O
 ```
+
+Note: the `X-Pmmf-Ac` header rotates every minute and the server rejects stale
+stamps, so `--at <historical time>` against the live server will 401. That is
+the client's behavior, not a bug; use `--offline` or the current time to avoid
+it.
 
 The script's header was checked against the game's own JS expression using the game's own `md5.min.js` for a fixed timestamp (`2026-11-05T15:28:42Z`):
 
