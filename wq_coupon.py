@@ -149,9 +149,10 @@ def coupon_from_response(payload: dict | None) -> str | None:
     return None
 
 
-def live_dispatch(stone_index: int, now: datetime) -> None:
+def live_dispatch(stone_index: int, now: datetime, session_id: str | None = None) -> None:
     """Walk t.A() -> t._() -> t.F() against the live server, reusing the
-    session_id the server mints in step 1.
+    session_id the server mints in step 1. If a session_id is passed in,
+    step 1 is skipped and that ID is used instead.
 
     Any HTTP status, JSON error body, or missing fields aborts with a
     message that names which of the three calls failed and why, so the
@@ -159,16 +160,19 @@ def live_dispatch(stone_index: int, now: datetime) -> None:
     """
     _, name = STONES[stone_index]
     print(f"Dispatching t.A() -> t._() -> t.F() for {name} (type={stone_index + 1})\n")
-    # 1. t.A() - mint the session
-    req = session_request(now)
-    print(f"1. {req.method} {req.url}")
-    response = send(req, now)
-    session_id = session_id_of(response.payload)
-    if not session_id:
-        body = _short(response)
-        print(f"   ! no session_id in response (status {response.status}): {body}")
-        return
-    print(f"   session_id = {session_id!r}\n")
+    if session_id:
+        print(f"1. t.A() skipped; reusing session_id = {session_id!r}\n")
+    else:
+        # 1. t.A() - mint the session
+        req = session_request(now)
+        print(f"1. {req.method} {req.url}")
+        response = send(req, now)
+        session_id = session_id_of(response.payload)
+        if not session_id:
+            body = _short(response)
+            print(f"   ! no session_id in response (status {response.status}): {body}")
+            return
+        print(f"   session_id = {session_id!r}\n")
 
     # 2. t._() - promotion_status + ui_texts
     req = init_request(session_id, now)
@@ -228,6 +232,8 @@ def main() -> None:
                         help="compute X-Pmmf-Ac for this ISO time instead of now (naive = UTC)")
     parser.add_argument("--offline", action="store_true",
                         help="do not dispatch; just print the requests the client would send")
+    parser.add_argument("--session", metavar="SESSION_ID", default=None,
+                        help="reuse this session_id instead of minting one via app/session (skips t.A())")
     args = parser.parse_args()
 
     now = args.at or datetime.now(timezone.utc)
@@ -240,15 +246,19 @@ def main() -> None:
     print(f'X-Pmmf-Ac  md5("{stamp}{HEADER_SALT}") = {auth_token(now)}\n')
 
     if args.offline:
+        session_id = args.session or PLACEHOLDER_SESSION_ID
         steps = (
             ("t.A()", session_request(now),
              'server returns {"session_id": ...}; stored in global save data, never generated locally'),
-            ("t._()", init_request(PLACEHOLDER_SESSION_ID, now),
+            ("t._()", init_request(session_id, now),
              "promotion_status: " + "; ".join(f"{k} = {v}" for k, v in PROMOTION_STATUS.items())),
-            ("t.F()", retrieve_request(PLACEHOLDER_SESSION_ID, args.stone, now),
+            ("t.F()", retrieve_request(session_id, args.stone, now),
              'coupon code = response["coupon_code"] if response["result"] == "successful"'),
         )
         for number, (origin, request, note) in enumerate(steps, 1):
+            if number == 1 and args.session:
+                print(f"{number}. {origin}  skipped; reusing session_id = {args.session!r}")
+                continue
             print(f"{number}. {origin}  {request.method} {request.url}")
             print(f"          -> {note}")
 
@@ -259,7 +269,7 @@ def main() -> None:
         return
 
     # live: actually hit the three endpoints with the headers the client would send
-    live_dispatch(args.stone, now)
+    live_dispatch(args.stone, now, args.session)
 
 
 if __name__ == "__main__":

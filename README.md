@@ -108,6 +108,7 @@ the server-minted `session_id` from `app/session` into `app/init` and
 python wq_coupon.py beef                # or 1-5, "Frosty Stone", spicy, ...
 python wq_coupon.py 3 --at 2026-11-05T15:28Z   # header for a fixed time (naive = UTC)
 python wq_coupon.py 1 --offline           # print the requests the client would send, no I/O
+python wq_coupon.py 2 --session <id>      # reuse a session_id from an earlier run; skips app/session
 ```
 
 Note: the `X-Pmmf-Ac` header rotates every minute and the server rejects stale
