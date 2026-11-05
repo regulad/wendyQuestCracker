@@ -1,0 +1,24 @@
+# Managed by the Probot "Settings" app (github.com/repository-settings/app).
+# Editing this file and pushing it to the default branch updates the repo.
+repository:
+  name: wendyQuestCracker
+  description: Reverse-engineering notes and a Python client for Wendy Quest's server-issued coupon codes.
+  homepage: ""
+
+  private: false
+
+  # Topics: comma-and-space separated string, NOT a YAML list — the
+  # Probot Settings schema takes `topics` as one string it splits itself.
+  topics: reverse-engineering, security-research, wendys, wendy-quest, rpg-maker-mz, nwjs, javascript-deobfuscation, webcrack, coupons, python
+
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  has_downloads: true
+
+  default_branch: master
+
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
+  delete_branch_on_merge: true
